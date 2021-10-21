@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}- {{product.name}}{% endblock %}
+
+{% block top %}{% endblock top %}
+
+{% block mid %}
+    <div class='row'>
+        <div class='col-lg-4'>
+            <div class='box-element'>
+                <img class="thumbnail" src="{{product.imageURL}}">
+            </div>
+        </div>
+        <div class='col-lg-4'>
+            <div class='box-element'>
+                <a class='btn btn-outline-dark' href="{% url 'store' %}">&#x2190; Back to Store</a>
+                <hr>
+                <h3><strong>Product Details:</strong></h3><br>
+                <h4><strong>{{product.name}}</strong></h4>
+                <h4>Rs. {{product.price}}</h4>
+                {% if product.category == "NM" %}
+                    <h4>Non-Magnetic</h4> {% endif %}
+                {% if product.category == "Mag" %}
+                    <h4>Magnetic</h4> {% endif %}
+                {% if product.category == "Sign" %}
+                    <h4>Signage</h4> {% endif %}
+                {% if product.category == "stand" %}
+                    <h4>Stand</h4> {% endif %}
+                <h4>{{product.description}}</h4>
+            </div>
+        </div>
+
+
+    </div>
+{% endblock mid %}
+
+{% block bottom %}
+{% endblock bottom%}

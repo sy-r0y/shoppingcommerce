@@ -1,0 +1,74 @@
+ {% extends "base.html" %}
+ {% load static %}
+
+ {% block title %} CHECKOUT {% endblock title %}
+
+<hr>
+
+{% block mid %}
+    <div class='row'>
+        <div class="col-lg-6">
+            <div class="box-element" id="form-wrapper">
+                <form id="form">
+                    <div id="user-info">
+                        <div class="form-field">
+                            <input required class="form-control" type="text" name="name" placeholder="Name..">
+
+                        </div>
+                        <div class="form-field">
+                            <input required class="form-control" type="email" name="email" placeholder="Email..">
+                        </div>
+
+                    </div>
+
+                    <div id="shipping-info">
+                        <hr><p>Shipping Information</p><hr>
+                        <div class="form-field">
+                            <input class="form-control" type="text" name="address" placeholder="Address..">
+                        </div>
+                        <div class="form-field">
+                            <input class="form-control" type="text" name="city" placeholder="City..">
+                        </div>
+                        <div class="form-field">
+                            <input class="form-control" type="text" name="state" placeholder="State..">
+                        </div>
+                        <div class="form-field">
+                            <input class="form-control" type="text" name="zipcode" placeholder="ZipCode..">
+                        </div>
+                    </div>
+                    <hr>
+                    <input id="form-button" class="btn btn-success btn-block" type="submit" value="Continue">
+                </form>
+
+            </div>
+            <br>
+            <div class="box-element hidden" id="payment-info">
+                <small>PayPal Options</small>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="box-element">
+                <a class='btn btn-outline-dark' href="{% url 'cart' %}">&#x2190;Back To Cart</a>
+                <hr>
+                <h3><strong> Order Summary: </strong></h3>   
+                <hr> 
+                {% for item in items %}
+                    <div class='cart-row'>
+                        <div style='flex:2'><img src="{{item.product.imageURL}}" class='row-image'></div>
+                        <div style='flex:1.5'>Name: {{item.product.name}} </div>
+                        <div style='flex:1'>Qty: {{item.quantity}} </div>
+                        <div style='flex:1'>Price: {{item.product.price|floatformat:2}} </div>
+                    </div>
+                {% endfor %}
+                <br>
+                <h4>Total Items: {{order.cartQUANTITY}}</h4>
+                <h4>Total Value: Rs.{{order.cartTOTAL|floatformat:2}}</h4>
+            </div>
+
+        </div>
+        
+    </div>
+{% endblock mid %}
+
+<hr>

@@ -1,0 +1,31 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %} STORE {% endblock title %}
+
+{% block top %}
+{% endblock top %}
+
+<br>
+
+{% block mid %} 
+    <div class='row'>
+        {% for p in products %}
+        <div class='col-lg-4'>
+            <img class="thumbnail" src="{{p.imageURL}}">
+            <div class='box-element product'>
+                <h6><strong>{{p.name}}</strong></h6>
+                <hr>
+                <button class="btn btn-outline-secondary add-btn">Add To Cart</button>
+                <a class="btn btn-outline-success" href="{% url 'productdetail' p.id %}"> View</a>
+                <h5 style="display: inline-block; float: right;"><strong>Rs.{{p.price|floatformat:2}}</strong></h5>
+            </div>
+        </div>
+        {% endfor %}
+       
+    </div>
+{% endblock mid %}
+
+{% block bottom %}
+{% endblock bottom %}
