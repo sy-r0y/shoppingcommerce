@@ -7,7 +7,7 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-SECRET_KEY = 'django-insecure-*t+b6sqi$16bz)#s-&9ewc@3r$0&xrs0@ko*$t6_6z^1ib530-'
+SECRET_KEY = ''
 
 DEBUG = True
 
