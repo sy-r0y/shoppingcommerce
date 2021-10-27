@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.views import View
 from .models import *
+from django.http import JsonResponse 
+import json
 
 # Create your views here.
 
@@ -60,3 +62,33 @@ def product_detail(request, pk):
     product= Product.objects.get(id=pk)
     context={'product':product}
     return render(request, template, context)
+
+def updateItem(request):
+
+    data= json.loads(request.body)   # Parse the JSON object sent via the fetch() POST request (from cart.js)
+
+    productID= data['productID']
+    action= data['action']
+    
+    #print('Product ID: ', productID)
+    #print('Action: ', action)
+
+    customer= request.user.customer
+    product= Product.objects.get(id= productID)
+    
+    order, created = Order.objects.get_or_create(customer= customer, complete= False)
+    orderItem, created = OrderItem.objects.get_or_create(order= order, product= product)
+
+    if action== 'add':
+        orderItem.quantity= (orderItem.quantity + 1)
+    elif action== 'remove':
+        orderItem.quantity= (orderItem.quantity - 1)
+
+    orderItem.save()  #  save() saves the state of this object to the model i.e save this order item in the table
+
+    if orderItem.quantity <= 0:
+        orderItem.delete()  # delete() deletes this object from the model i.e remove this order item in the table
+
+    return JsonResponse('Item Added!!', safe= False)
+
+    
