@@ -7,7 +7,8 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-SECRET_KEY = ''
+SECRET_KEY = '9f-=5435yt6m+p&m35h@gtd9q&g*7@kpg*0+)&@@7#u&*8*nws'
+
 
 DEBUG = True
 

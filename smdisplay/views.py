@@ -9,15 +9,37 @@ import json
 
 
 def index(request):
+    if request.user.is_authenticated:
+        customer= request.user.customer
+        order, created= Order.objects.get_or_create(customer= customer, complete= False)
+        items= order.orderitem_set.all()
+        cartQUANTITY= order.cartQUANTITY
+    else:
+        items= []
+        order= {'cartTOTAL': 0, 'cartQUANTITY': 0}
+        cartQUANTITY= order['cartQUANTITY']
+    
     template= 'base.html'
-    context= {}
+    context= {'cartQUANTITY':cartQUANTITY}
     return render(request, template, context)
 
 
 def store(request):
+    
+    if request.user.is_authenticated:
+        customer= request.user.customer
+        order, created= Order.objects.get_or_create(customer= customer, complete= False)
+        items= order.orderitem_set.all()
+        cartQUANTITY= order.cartQUANTITY
+    else:
+        items= []
+        order= {'cartTOTAL':0, 'cartQUANTITY':0}
+        cartQUANTITY= order['cartQUANTITY']
+    
+
     template= 'store.html'
     products= Product.objects.all()
-    context= {'products':products}
+    context= {'products':products, 'cartQUANTITY':cartQUANTITY}
     return render(request, template, context)
 
 def checkout(request):
@@ -27,13 +49,15 @@ def checkout(request):
         customer= request.user.customer
         order, created= Order.objects.get_or_create(customer=customer, complete=False)
         items= order.orderitem_set.all()
+        cartQUANTITY= order.cartQUANTITY
     else:
         items=[]
         order={'cartTOTAL':0, 'cartQUANTITY': 0}
+        cartQUANTITY= order['cartQUANTITY']
 
     
     template= 'checkout.html'
-    context={'items': items, 'order': order}
+    context={'items': items, 'order': order, 'cartQUANTITY':cartQUANTITY}
     return render(request, template, context)
 
 
@@ -48,19 +72,32 @@ def cart(request):
                                                        # if get_or_create() does not find the object.. it creates it
         
         items= order.orderitem_set.all()
+        cartQUANTITY= order.cartQUANTITY
     else:
         items= []
         order= {'cartTOTAL':0, 'cartQUANTITY':0}
+        cartQUANTITY= order['cartQUANTITY']
     
     template= 'cart.html'
-    context= {'items': items, 'order': order}
+    context= {'items': items, 'order': order, 'cartQUANTITY':cartQUANTITY}
     return render(request, template, context)
 
 
 def product_detail(request, pk):
+
+    if request.user.is_authenticated:
+        customer= request.user.customer
+        order, created= Order.objects.get_or_create(customer=customer, complete=False)
+        items= order.orderitem_set.all()
+        cartQUANTITY= order.cartQUANTITY
+    else:
+        items= []
+        order= {'cartTOTAL': 0, 'cartQUANTITY': 0}
+        orderQUANTITY= order['cartQUANTITY']
+    
     template='productdetail.html'
     product= Product.objects.get(id=pk)
-    context={'product':product}
+    context={'product':product, 'cartQUANTITY': cartQUANTITY}
     return render(request, template, context)
 
 def updateItem(request):

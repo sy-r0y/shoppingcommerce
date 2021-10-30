@@ -50,17 +50,15 @@ function updateUserOrder(productId, action){
     })
     .then((response) => {return response.json()})
     
-    .then((data) => {console.log('data returned: ', data)})
-    
+    .then((data) => {
+        console.log('data returned: ', data)
+        location.reload()
+    })
+}
 
     /* Whenever we are sending POST data to the backend/server in Django
        We need to send CSRF token.
        Normally we do the CSRF token within the form (like {% csrf_token %}). 
        But in JavaScript, we don't have the Form
-       */
-    
-    /* Create the CSRF token within the script tag in the base.html*/
-
-    
-    
-}
+       Create the CSRF token within the script tag in the base.html
+    */
