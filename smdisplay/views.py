@@ -4,8 +4,9 @@ from django.views import View
 from .models import *
 from django.http import JsonResponse 
 import json
+import datetime
 
-# Create your views here.
+# Create your views here
 
 
 def index(request):
@@ -16,7 +17,7 @@ def index(request):
         cartQUANTITY= order.cartQUANTITY
     else:
         items= []
-        order= {'cartTOTAL': 0, 'cartQUANTITY': 0}
+        order= {'cartTOTAL': 0, 'cartQUANTITY': 0, 'shipping': False}
         cartQUANTITY= order['cartQUANTITY']
     
     template= 'base.html'
@@ -33,7 +34,7 @@ def store(request):
         cartQUANTITY= order.cartQUANTITY
     else:
         items= []
-        order= {'cartTOTAL':0, 'cartQUANTITY':0}
+        order= {'cartTOTAL':0, 'cartQUANTITY':0, 'shipping': False}
         cartQUANTITY= order['cartQUANTITY']
     
 
@@ -52,7 +53,7 @@ def checkout(request):
         cartQUANTITY= order.cartQUANTITY
     else:
         items=[]
-        order={'cartTOTAL':0, 'cartQUANTITY': 0}
+        order={'cartTOTAL':0, 'cartQUANTITY': 0, 'shipping': False}
         cartQUANTITY= order['cartQUANTITY']
 
     
@@ -75,7 +76,7 @@ def cart(request):
         cartQUANTITY= order.cartQUANTITY
     else:
         items= []
-        order= {'cartTOTAL':0, 'cartQUANTITY':0}
+        order= {'cartTOTAL':0, 'cartQUANTITY':0, 'shipping': False}
         cartQUANTITY= order['cartQUANTITY']
     
     template= 'cart.html'
@@ -92,8 +93,8 @@ def product_detail(request, pk):
         cartQUANTITY= order.cartQUANTITY
     else:
         items= []
-        order= {'cartTOTAL': 0, 'cartQUANTITY': 0}
-        orderQUANTITY= order['cartQUANTITY']
+        order= {'cartTOTAL': 0, 'cartQUANTITY': 0, 'shipping': False}
+        cartQUANTITY= order['cartQUANTITY']
     
     template='productdetail.html'
     product= Product.objects.get(id=pk)
@@ -127,5 +128,39 @@ def updateItem(request):
         orderItem.delete()  # delete() deletes this object from the model i.e remove this order item in the table
 
     return JsonResponse('Item Added!!', safe= False)
+
+def processOrder(request):
+    # print('Data:', request.body)
+
+    transaction_id= datetime.datetime.now().timestamp()
+    data= json.loads(request.body)
+    #print('Transaction ID', transaction_id)
+
+    if request.user.is_authenticated:
+        customer= request.user.customer
+        order, created= Order.objects.get_or_create(customer=customer, complete=False)
+        total= float(data['form']['total'])
+        order.transaction_id= transaction_id
+
+        if total == order.cartTOTAL:
+            order.complete=True
+        order.save()
+
+        if order.shipping == True:
+            ShippingAddress.objects.create(
+                customer= customer,
+                order= order,
+                address= data['shipping']['address'],
+                city= data['shipping']['city'],
+                state= data['shipping']['state'],
+                zipcode= data['shipping']['zipcode'],
+            )
+
+
+    else:
+        print('user not logged in')
+
+    
+    return JsonResponse('Payment Submitted!!!', safe= False)
 
     

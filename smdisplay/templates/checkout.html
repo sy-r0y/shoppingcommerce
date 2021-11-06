@@ -39,11 +39,11 @@
                     <hr>
                     <input id="form-button" class="btn btn-success btn-block" type="submit" value="Continue">
                 </form>
-
             </div>
             <br>
             <div class="box-element hidden" id="payment-info">
                 <small>PayPal Options</small>
+                <button id='make-payment'>Make Payment</button>
             </div>
         </div>
 
@@ -67,8 +67,91 @@
             </div>
 
         </div>
-        
     </div>
+<script type='text/javascript'>
+    
+    var form= document.getElementById('form')
+    var shipping= "{{order.shipping}}"
+    var total= "{{order.cartTOTAL}}"
+
+    console.log("User:- ", user)
+    if (shipping== "False"){
+        document.getElementById('shipping-info').innerHTML= ''
+    }
+    
+    if (user != "AnonymousUser"){
+        document.getElementById('user-info').innerHTML = ''
+    }
+
+    if (shipping == 'True' && user!= 'AnonymousUser'){
+        document.getElementById('form-wrapper').classList.add('hidden') // Hide entire form if user is logged in & shipping is not required(for digital project)
+        document.getElementById('payment-info').classList.remove('hidden') // Show paymen options if user is logged in & shipping is not required
+    }
+
+    form.addEventListener('submit', function(e){
+        e.preventDefault()  // stop the form from performing its normal functions, we are going to handle what occurs
+        
+        console.log("Form Submitted!!")
+        document.getElementById('payment-info').classList.remove('hidden');
+        document.getElementById('form-button').classList.add('hidden');
+    })
+
+    document.getElementById('make-payment').addEventListener('click', function(e){
+        submitFormData()  // Trigger this function when the event "click" happens on the element "make-payment"
+        
+    })
+    function submitFormData(){
+        
+        // Create 2 JavaScript objects & pass the data to the backend using those two objects
+        
+        console.log('Payment Done!!')
+        var userFormData= {
+            'name': null,
+            'email': null,
+            'total': total,
+        }
+        var shippingInfo= {
+            'address': null,
+            'city': null,
+            'state': null,
+            'zipcode': null,
+        }
+
+        if (shipping != "False"){
+            shippingInfo.address= form.address.value
+            shippingInfo.city= form.city.value
+            shippingInfo.state= form.state.value
+            shippingInfo.zipcode= form.zipcode.value
+
+        }
+        if(user == "AnonymousUser"){
+            userFormData.name= form.name.value
+            userFormData.email= form.email.value
+            //userFormData.total
+        }
+
+        //console.log('User Form Info: ', userFormData)
+        //console.log('Shipping Info: ', shippingInfo)
+        
+        var url= "process_order"
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken,
+            },
+            body: JSON.stringify({"form": userFormData, "shipping": shippingInfo}),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log('Success', data);
+            alert("Transactoin Completed");
+            window.location.href= "{% url 'store' %}"
+        })
+    }
+
+
+</script>
 {% endblock mid %}
 
 <hr>
