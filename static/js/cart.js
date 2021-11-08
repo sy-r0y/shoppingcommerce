@@ -17,7 +17,8 @@ for (i=0; i< updateBtns.length; i++){
 
         if(user=='AnonymousUser'){
             console.log('Anonymous User')
-        }else{
+        }
+        else{
 
             //console.log('Hello there- ', user)
             //console.log('ID & Action- ', productID, action)

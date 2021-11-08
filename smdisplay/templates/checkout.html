@@ -70,11 +70,12 @@
     </div>
 <script type='text/javascript'>
     
-    var form= document.getElementById('form')
+    
     var shipping= "{{order.shipping}}"
     var total= "{{order.cartTOTAL}}"
 
-    console.log("User:- ", user)
+    //console.log("User:- ", user)
+    
     if (shipping== "False"){
         document.getElementById('shipping-info').innerHTML= ''
     }
@@ -83,24 +84,30 @@
         document.getElementById('user-info').innerHTML = ''
     }
 
-    if (shipping == 'True' && user!= 'AnonymousUser'){
+    if (shipping == 'False' && user!= 'AnonymousUser'){
         document.getElementById('form-wrapper').classList.add('hidden') // Hide entire form if user is logged in & shipping is not required(for digital project)
         document.getElementById('payment-info').classList.remove('hidden') // Show paymen options if user is logged in & shipping is not required
     }
 
+    var form= document.getElementById('form')
+
+    csrftoken= form.getElementsByTagName('input')[0].value
+    console.log('New Token', form.getElementsByTagName('input')[0].value)
+    
     form.addEventListener('submit', function(e){
         e.preventDefault()  // stop the form from performing its normal functions, we are going to handle what occurs
         
         console.log("Form Submitted!!")
-        document.getElementById('payment-info').classList.remove('hidden');
         document.getElementById('form-button').classList.add('hidden');
+        document.getElementById('payment-info').classList.remove('hidden');
+        
     })
 
     document.getElementById('make-payment').addEventListener('click', function(e){
-        submitFormData()  // Trigger this function when the event "click" happens on the element "make-payment"
+        submitFormData()  // Trigger this function when the event "click" happens on the element "make-payment" i.e customer "makes the payment"
         
     })
-    function submitFormData(){
+    function submitFormData(){  // function gets called when customer "pays" (clicks on make payment)
         
         // Create 2 JavaScript objects & pass the data to the backend using those two objects
         
@@ -145,7 +152,7 @@
         .then((response) => response.json())
         .then((data) => {
             console.log('Success', data);
-            alert("Transactoin Completed");
+            alert("Transaction Completed");
             window.location.href= "{% url 'store' %}"
         })
     }

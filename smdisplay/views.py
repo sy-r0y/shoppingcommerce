@@ -43,7 +43,8 @@ def store(request):
     context= {'products':products, 'cartQUANTITY':cartQUANTITY}
     return render(request, template, context)
 
-def checkout(request):
+
+def checkout(request): 
     
     # check if the user is authenticated or not
     if request.user.is_authenticated:
@@ -129,6 +130,10 @@ def updateItem(request):
 
     return JsonResponse('Item Added!!', safe= False)
 
+
+#from django.views.decorators.csrf import csrf_exempt
+
+#@csrf_exempt
 def processOrder(request):
     # print('Data:', request.body)
 
@@ -155,12 +160,9 @@ def processOrder(request):
                 state= data['shipping']['state'],
                 zipcode= data['shipping']['zipcode'],
             )
-
-
     else:
         print('user not logged in')
 
-    
     return JsonResponse('Payment Submitted!!!', safe= False)
 
     
