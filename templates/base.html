@@ -24,9 +24,43 @@
     }
         return cookieValue;
     }
+
     const csrftoken = getToken('csrftoken');
 
-   </script>
+
+    // Add functionality for Guest checkout as well as maintaining Geust cart
+    // Create a function to get cookie
+    function getCookie(name){
+        // Split the cookie string & get all the individual name-value pairs into an array
+        var cookieArray= document.cookie.split(';');
+
+        //Loop through the array elements
+        for( var i=0; i< cookieArray; i++){
+            var cookiePair = cookieArr[i].split('=');
+
+            // Remove white-spaces at the beginning of the cookie name & compare it with given string
+
+            if( name==cookiePair[0].trim()){
+                // Decode the cookie value & return
+
+                return decodeURIComponent(cookiePair[i]);
+            }
+
+        }
+        //Return null if not found
+        return null;
+
+        var cart= JSON.parse(getCookie('cart'))
+
+
+    }
+
+   
+   
+   
+   
+   
+    </script>
     
 
 </head>

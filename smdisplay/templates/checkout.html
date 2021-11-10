@@ -91,15 +91,15 @@
 
     var form= document.getElementById('form')
 
-    csrftoken= form.getElementsByTagName('input')[0].value
-    console.log('New Token', form.getElementsByTagName('input')[0].value)
+    //csrftoken= form.getElementsByTagName('input')[0].value
+    //console.log('New Token', form.getElementsByTagName('input')[0].value)
     
     form.addEventListener('submit', function(e){
         e.preventDefault()  // stop the form from performing its normal functions, we are going to handle what occurs
         
         console.log("Form Submitted!!")
-        document.getElementById('form-button').classList.add('hidden');
-        document.getElementById('payment-info').classList.remove('hidden');
+        document.getElementById('form-button').classList.add('hidden')
+        document.getElementById('payment-info').classList.remove('hidden')
         
     })
 
