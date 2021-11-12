@@ -35,31 +35,39 @@
         var cookieArray= document.cookie.split(';');
 
         //Loop through the array elements
-        for( var i=0; i< cookieArray; i++){
-            var cookiePair = cookieArr[i].split('=');
+        for(var i=0; i< cookieArray.length; i++){
+            var cookiePair = cookieArray[i].split('=');
 
             // Remove white-spaces at the beginning of the cookie name & compare it with given string
-
-            if( name==cookiePair[0].trim()){
-                // Decode the cookie value & return
-
-                return decodeURIComponent(cookiePair[i]);
+            if(name== cookiePair[0].trim()){
+                //Decode the cookie value & return
+                return decodeURIComponent(cookiePair[1]);
             }
-
         }
         //Return null if not found
         return null;
+    }
+    var cart= JSON.parse(getCookie('cart'))
 
-        var cart= JSON.parse(getCookie('cart'))
+    if (cart == undefined){
+        cart= {}  // setup a new empty cart cookie via this {} dictionary .. basically a key-value pair
+        console.log('Cart Created!! ')
+        
+        //Now create the actual cookies 
+        document.cookie= 'cart=' + JSON.stringify(cart) + ';domain=;path=/' 
 
-
+        // sample-- "cart={};domain=;path=/"
     }
 
-   
-   
-   
-   
-   
+    console.log('Cart Cookie- ', cart)
+
+    
+        /*if ( cart == undefines){
+
+            cart= {}
+            console.log('Cart Created', cart)
+            document.cookie= 'cart=' + JSON.stringify(cart) + ';domain=;path=/'
+        }*/
     </script>
     
 

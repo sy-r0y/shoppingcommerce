@@ -66,6 +66,7 @@ def checkout(request):
 def cart(request):
 
     # two scenarios- user is registered/logged-in, user is not registered/logged-in
+    #cartQUANTITY=0
     if request.user.is_authenticated:
         customer= request.user.customer
         order, created= Order.objects.get_or_create(customer=customer, complete=False)  # get the order object or create the order object(if it already exists) 
@@ -76,12 +77,27 @@ def cart(request):
         items= order.orderitem_set.all()
         cartQUANTITY= order.cartQUANTITY
     else:
+        
+        # write code to handle GUEST checkout/cart via COOKIES
+
+        try:
+            cart = json.loads(request.COOKIES['cart'])
+        except:
+            cart = {} # dummy cart incase there is no 'cart' cookie available
+        
+        # print('CART- ', cart)
+
         items= []
         order= {'cartTOTAL':0, 'cartQUANTITY':0, 'shipping': False}
-        cartQUANTITY= order['cartQUANTITY']
+        cartQUANTITY = order['cartQUANTITY']
+
+        for i in cart:
+            cartQUANTITY += cart[i]['quantity']
+            #print(cart[i]['quantity'])
+            #print("Quantity", cartQUANTITY)
     
     template= 'cart.html'
-    context= {'items': items, 'order': order, 'cartQUANTITY':cartQUANTITY}
+    context= {'items': items, 'order': order, 'cartQUANTITY': cartQUANTITY}
     return render(request, template, context)
 
 
