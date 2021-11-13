@@ -58,11 +58,11 @@
                         <div style='flex:2'><img src="{{item.product.imageURL}}" class='row-image'></div>
                         <div style='flex:1.5'>Name: {{item.product.name}} </div>
                         <div style='flex:1'>Qty: {{item.quantity}} </div>
-                        <div style='flex:1'>Price: {{item.product.price|floatformat:2}} </div>
+                        <div style='flex:1'>Rate: {{item.product.price|floatformat:2}} </div>
                     </div>
                 {% endfor %}
                 <br>
-                <h4>Total Items: {{order.cartQUANTITY}}</h4>
+                <h4>Total Items: {{cartQUANTITY}}</h4>
                 <h4>Total Value: Rs.{{order.cartTOTAL|floatformat:2}}</h4>
             </div>
 

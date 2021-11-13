@@ -16,14 +16,20 @@ def index(request):
         items= order.orderitem_set.all()
         cartQUANTITY= order.cartQUANTITY
     else:
+        try:
+            cart= json.loads(request.COOKIES['cart'])
+        except:
+            cart= {}
+
         items= []
         order= {'cartTOTAL': 0, 'cartQUANTITY': 0, 'shipping': False}
         cartQUANTITY= order['cartQUANTITY']
+        for i in cart:
+            cartQUANTITY += cart[i]['quantity']
     
     template= 'base.html'
-    context= {'cartQUANTITY':cartQUANTITY}
+    context= {'cartQUANTITY' : cartQUANTITY}
     return render(request, template, context)
-
 
 def store(request):
     
@@ -33,35 +39,58 @@ def store(request):
         items= order.orderitem_set.all()
         cartQUANTITY= order.cartQUANTITY
     else:
+        try:
+            cart= json.loads(request.COOKIES['cart'])
+        except:
+            cart={}
+
         items= []
         order= {'cartTOTAL':0, 'cartQUANTITY':0, 'shipping': False}
         cartQUANTITY= order['cartQUANTITY']
+        for i in cart:
+            cartQUANTITY += cart[i]['quantity']
     
-
     template= 'store.html'
     products= Product.objects.all()
     context= {'products':products, 'cartQUANTITY':cartQUANTITY}
     return render(request, template, context)
 
-
 def checkout(request): 
-    
     # check if the user is authenticated or not
     if request.user.is_authenticated:
         customer= request.user.customer
         order, created= Order.objects.get_or_create(customer=customer, complete=False)
         items= order.orderitem_set.all()
         cartQUANTITY= order.cartQUANTITY
+        cartTOTAL= order.cartTOTAL
     else:
+        try:
+            cart= json.loads(request.COOKIES['cart'])
+        except:
+            cart= {}
+                
         items=[]
         order={'cartTOTAL':0, 'cartQUANTITY': 0, 'shipping': False}
         cartQUANTITY= order['cartQUANTITY']
+        #cartTOTAL= order['cartTOTAL']
+        for i in cart:
+            cartQUANTITY += cart[i]['quantity']
+            product= Product.objects.get(id=i)
+            order['cartTOTAL'] += (product.price * cart[i]['quantity'])
 
-    
+            item= {
+                'product':{
+                    'name':product.name,
+                    'price': product.price,
+                    'imageURL': product.imageURL,
+                },
+                'quantity': cart[i]['quantity'],
+            }
+            items.append(item)  # append the item onto the items
+
     template= 'checkout.html'
-    context={'items': items, 'order': order, 'cartQUANTITY':cartQUANTITY}
+    context={'items': items, 'order': order, 'cartQUANTITY': cartQUANTITY}
     return render(request, template, context)
-
 
 def cart(request):
 
@@ -76,30 +105,38 @@ def cart(request):
         
         items= order.orderitem_set.all()
         cartQUANTITY= order.cartQUANTITY
+        cartTOTAL= order.cartTOTAL
     else:
-        
         # write code to handle GUEST checkout/cart via COOKIES
-
         try:
             cart = json.loads(request.COOKIES['cart'])
         except:
             cart = {} # dummy cart incase there is no 'cart' cookie available
         
         # print('CART- ', cart)
-
         items= []
         order= {'cartTOTAL':0, 'cartQUANTITY':0, 'shipping': False}
         cartQUANTITY = order['cartQUANTITY']
-
+        #cartTOTAL= order['cartTOTAL']
         for i in cart:
             cartQUANTITY += cart[i]['quantity']
-            #print(cart[i]['quantity'])
-            #print("Quantity", cartQUANTITY)
+            product= Product.objects.get(id=i)
+            order['cartTOTAL'] += (product.price * cart[i]['quantity'])
+            item= {
+                'product': {
+                    'id': product.id,
+                    'name': product.name,
+                    'price': product.price,
+                    'imageURL': product.imageURL,
+                },
+                'quantity': cart[i]['quantity'],
+                'itemTOTAL': order['cartTOTAL'],
+            }
+            items.append(item)  #  append to the existing 'items' list object
     
     template= 'cart.html'
     context= {'items': items, 'order': order, 'cartQUANTITY': cartQUANTITY}
     return render(request, template, context)
-
 
 def product_detail(request, pk):
 
@@ -109,9 +146,15 @@ def product_detail(request, pk):
         items= order.orderitem_set.all()
         cartQUANTITY= order.cartQUANTITY
     else:
+        try:
+            cart= json.loads(request.COOKIES['cart'])
+        except:
+            cart={}
         items= []
         order= {'cartTOTAL': 0, 'cartQUANTITY': 0, 'shipping': False}
         cartQUANTITY= order['cartQUANTITY']
+        for i in cart:
+            cartQUANTITY += cart[i]['quantity']
     
     template='productdetail.html'
     product= Product.objects.get(id=pk)
@@ -124,7 +167,6 @@ def updateItem(request):
 
     productID= data['productID']
     action= data['action']
-    
     #print('Product ID: ', productID)
     #print('Action: ', action)
 
