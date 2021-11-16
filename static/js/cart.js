@@ -10,16 +10,19 @@ for (i=0; i< updateBtns.length; i++){
     
     // Add an Event Handler
     updateBtns[i].addEventListener('click', function(){
-        var productId= this.dataset.product   // this.dataset.product-- here 'product' is the attribute we added at our template store.html
+        var productID= this.dataset.product   // this.dataset.product-- here 'product' is the attribute we added at our template store.html
         var action= this.dataset.action    // action data attribute
         //console.log('ID: ', productID, " || ", '@action: ', action)
         //console.log("User: ", user)
+        //console.log('Action: ', action)
 
         if(user == 'AnonymousUser'){
             
             //console.log('Anonymous User')
-            // Since user is not logged in i.e anonymous user.. call the "addCookieItem" function to handle the cookie based cart
-            updateCookieItem(productId, action)
+            // Since user is not logged in i.e anonymous user.. call the "updateCookieItem" function to handle the cookie based cart
+            //console.log('Product ID ISS- ', productId)
+            updateCookieItem(productID, action)
+            
         }
         else{
 
@@ -27,22 +30,25 @@ for (i=0; i< updateBtns.length; i++){
             //console.log('ID & Action- ', productID, action)
             //console.log('Action is- ', action)
             
-
             // Send the product ID of the button/element upon which the 'action' was performed
             // Send the 'action' performed(add or remove)
             // View function will receive these data.. and then make changes to the model
-            updateUserOrder(productId, action)
+            updateUserOrder(productID, action)
         }
     })
 }
 
-function updateUserOrder(productId, action){
+function updateUserOrder(productID, action){
+    //console.log('ID: ', productID, " || ", '@action: ', action)
+    //console.log('Product ID ISSS- ', productId)
 
-    console.log('Function Called. User is logged in. Product ID & Action- ', productId, action)
+    //console.log('Function Called. User is logged in. Product ID & Action- ', productId, action)
 
     //console.log('hello from function', produtId, action)
     
     var url= "update_item"
+
+    //console.log('Call Update Item')
 
     fetch(url, {
         method: 'POST',
@@ -50,10 +56,9 @@ function updateUserOrder(productId, action){
                   'X-CSRFToken': csrftoken, 
                   
                  },
-        body: JSON.stringify({'productID': productId, 'action': action}) // we can't just send the object to the backend, hence we needed to STRINGIFY the object
+        body: JSON.stringify({'productID': productID, 'action': action}) // we can't just send the object to the backend, hence we needed to STRINGIFY the object
     })
     .then((response) => {return response.json()})
-    
     .then((data) => {
         console.log('data returned: ', data)
         location.reload()
@@ -67,32 +72,34 @@ function updateUserOrder(productId, action){
     */
 }
 
-function updateCookieItem(productId, action){
+function updateCookieItem(productID, action){
 
     // Handle the cart items, additions/removal of items in the cart... in case the user is not logged in
     // i.e handle the cart operations for "Guest/Anonymous" user
 
-    console.log("Hello Anonymouse/Guest User!!")
+    //console.log("Hello Anonymouse/Guest User!!")
     //console.log('ProductID & Action- ', productId, action)
 
+    
     if(action =='add'){
-        console.log("Add Item", productId, action);
+        //console.log("Add Item", productId, action);
 
-        if(cart[productId]== undefined){
-            cart[productId]= { 'quantity' : 1 }
+        if(cart[productID]== undefined){
+            cart[productID]= { 'quantity' : 1 }
         }
         else{
-            cart[productId]['quantity'] += 1
+            cart[productID]['quantity'] += 1
         }
     }
     if(action == 'remove'){
-        console.log("Remove Item", productId, action)
+        //console.log("Remove Item", productId, action)
         
-        cart[productId]['quantity'] -= 1
+        cart[productID]['quantity'] -= 1
+        //console.log(cart[productId]['quantity'])
 
-        if(cart[productId]['quantity'] <=0 ){
-            delete cart[productId];
-            console.log('Item Deleted From Cart')
+        if(cart[productID]['quantity'] <=0 ){
+            delete cart[productID];
+            //console.log('Item Deleted From Cart')
         }
         
     }

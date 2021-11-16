@@ -5,50 +5,26 @@ from .models import *
 from django.http import JsonResponse 
 import json
 import datetime
+from .utils import cookieCart, cartData
 
 # Create your views here
 
 
 def index(request):
-    if request.user.is_authenticated:
-        customer= request.user.customer
-        order, created= Order.objects.get_or_create(customer= customer, complete= False)
-        items= order.orderitem_set.all()
-        cartQUANTITY= order.cartQUANTITY
-    else:
-        try:
-            cart= json.loads(request.COOKIES['cart'])
-        except:
-            cart= {}
-
-        items= []
-        order= {'cartTOTAL': 0, 'cartQUANTITY': 0, 'shipping': False}
-        cartQUANTITY= order['cartQUANTITY']
-        for i in cart:
-            cartQUANTITY += cart[i]['quantity']
     
+    data= cartData(request)
+
+    cartQUANTITY= data['cartQUANTITY']
+
     template= 'base.html'
     context= {'cartQUANTITY' : cartQUANTITY}
     return render(request, template, context)
 
 def store(request):
     
-    if request.user.is_authenticated:
-        customer= request.user.customer
-        order, created= Order.objects.get_or_create(customer= customer, complete= False)
-        items= order.orderitem_set.all()
-        cartQUANTITY= order.cartQUANTITY
-    else:
-        try:
-            cart= json.loads(request.COOKIES['cart'])
-        except:
-            cart={}
+    data= cartData(request)
 
-        items= []
-        order= {'cartTOTAL':0, 'cartQUANTITY':0, 'shipping': False}
-        cartQUANTITY= order['cartQUANTITY']
-        for i in cart:
-            cartQUANTITY += cart[i]['quantity']
+    cartQUANTITY= data['cartQUANTITY']
     
     template= 'store.html'
     products= Product.objects.all()
@@ -56,37 +32,12 @@ def store(request):
     return render(request, template, context)
 
 def checkout(request): 
-    # check if the user is authenticated or not
-    if request.user.is_authenticated:
-        customer= request.user.customer
-        order, created= Order.objects.get_or_create(customer=customer, complete=False)
-        items= order.orderitem_set.all()
-        cartQUANTITY= order.cartQUANTITY
-        cartTOTAL= order.cartTOTAL
-    else:
-        try:
-            cart= json.loads(request.COOKIES['cart'])
-        except:
-            cart= {}
-                
-        items=[]
-        order={'cartTOTAL':0, 'cartQUANTITY': 0, 'shipping': False}
-        cartQUANTITY= order['cartQUANTITY']
-        #cartTOTAL= order['cartTOTAL']
-        for i in cart:
-            cartQUANTITY += cart[i]['quantity']
-            product= Product.objects.get(id=i)
-            order['cartTOTAL'] += (product.price * cart[i]['quantity'])
+    
+    data= cartData(request)
 
-            item= {
-                'product':{
-                    'name':product.name,
-                    'price': product.price,
-                    'imageURL': product.imageURL,
-                },
-                'quantity': cart[i]['quantity'],
-            }
-            items.append(item)  # append the item onto the items
+    items= data['items']
+    cartQUANTITY= data['cartQUANTITY']
+    order= data['order']
 
     template= 'checkout.html'
     context={'items': items, 'order': order, 'cartQUANTITY': cartQUANTITY}
@@ -94,67 +45,24 @@ def checkout(request):
 
 def cart(request):
 
-    # two scenarios- user is registered/logged-in, user is not registered/logged-in
-    #cartQUANTITY=0
-    if request.user.is_authenticated:
-        customer= request.user.customer
-        order, created= Order.objects.get_or_create(customer=customer, complete=False)  # get the order object or create the order object(if it already exists) 
-                                                       # get_or_create() get the object to query it or create a new one
-                                                       # get_or_create() first queries an object ..
-                                                       # if get_or_create() does not find the object.. it creates it
+    data= cartData(request)
+
+    items= data['items']
+    cartQUANTITY= data['cartQUANTITY']
+    order= data['order']
         
-        items= order.orderitem_set.all()
-        cartQUANTITY= order.cartQUANTITY
-        cartTOTAL= order.cartTOTAL
-    else:
-        # write code to handle GUEST checkout/cart via COOKIES
-        try:
-            cart = json.loads(request.COOKIES['cart'])
-        except:
-            cart = {} # dummy cart incase there is no 'cart' cookie available
-        
-        # print('CART- ', cart)
-        items= []
-        order= {'cartTOTAL':0, 'cartQUANTITY':0, 'shipping': False}
-        cartQUANTITY = order['cartQUANTITY']
-        #cartTOTAL= order['cartTOTAL']
-        for i in cart:
-            cartQUANTITY += cart[i]['quantity']
-            product= Product.objects.get(id=i)
-            order['cartTOTAL'] += (product.price * cart[i]['quantity'])
-            item= {
-                'product': {
-                    'id': product.id,
-                    'name': product.name,
-                    'price': product.price,
-                    'imageURL': product.imageURL,
-                },
-                'quantity': cart[i]['quantity'],
-                'itemTOTAL': order['cartTOTAL'],
-            }
-            items.append(item)  #  append to the existing 'items' list object
-    
     template= 'cart.html'
+    #print('Item ID:- ', items)
     context= {'items': items, 'order': order, 'cartQUANTITY': cartQUANTITY}
     return render(request, template, context)
 
 def product_detail(request, pk):
 
-    if request.user.is_authenticated:
-        customer= request.user.customer
-        order, created= Order.objects.get_or_create(customer=customer, complete=False)
-        items= order.orderitem_set.all()
-        cartQUANTITY= order.cartQUANTITY
-    else:
-        try:
-            cart= json.loads(request.COOKIES['cart'])
-        except:
-            cart={}
-        items= []
-        order= {'cartTOTAL': 0, 'cartQUANTITY': 0, 'shipping': False}
-        cartQUANTITY= order['cartQUANTITY']
-        for i in cart:
-            cartQUANTITY += cart[i]['quantity']
+    data= cartData(request)
+
+    items= data['items']
+    cartQUANTITY= data['cartQUANTITY']
+    order= data['order']
     
     template='productdetail.html'
     product= Product.objects.get(id=pk)
@@ -163,11 +71,12 @@ def product_detail(request, pk):
 
 def updateItem(request):
 
+    #print('update item called!!')
     data= json.loads(request.body)   # Parse the JSON object sent via the fetch() POST request (from cart.js)
 
     productID= data['productID']
     action= data['action']
-    #print('Product ID: ', productID)
+    #print('Product ID is:- ', productID)
     #print('Action: ', action)
 
     customer= request.user.customer
@@ -196,7 +105,7 @@ def processOrder(request):
     # print('Data:', request.body)
 
     transaction_id= datetime.datetime.now().timestamp()
-    data= json.loads(request.body)
+    data= json.loads(request.body)  # receive the JSON POST request data
     #print('Transaction ID', transaction_id)
 
     if request.user.is_authenticated:
