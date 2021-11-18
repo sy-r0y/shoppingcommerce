@@ -5,7 +5,7 @@ from .models import *
 from django.http import JsonResponse 
 import json
 import datetime
-from .utils import cookieCart, cartData
+from .utils import cookieCart, cartData, guestCheckout
 
 # Create your views here
 
@@ -103,7 +103,6 @@ def updateItem(request):
 #@csrf_exempt
 def processOrder(request):
     # print('Data:', request.body)
-
     transaction_id= datetime.datetime.now().timestamp()
     data= json.loads(request.body)  # receive the JSON POST request data
     #print('Transaction ID', transaction_id)
@@ -111,25 +110,75 @@ def processOrder(request):
     if request.user.is_authenticated:
         customer= request.user.customer
         order, created= Order.objects.get_or_create(customer=customer, complete=False)
-        total= float(data['form']['total'])
+                
+        '''total= float(data['form']['total'])
         order.transaction_id= transaction_id
 
         if total == order.cartTOTAL:
             order.complete=True
-        order.save()
+        order.save()'''
 
-        if order.shipping == True:
-            ShippingAddress.objects.create(
-                customer= customer,
-                order= order,
-                address= data['shipping']['address'],
-                city= data['shipping']['city'],
-                state= data['shipping']['state'],
-                zipcode= data['shipping']['zipcode'],
-            )
     else:
+        
         print('user not logged in')
+        
+        '''# handle guest/anonmous account checkout
+        # get the JSON request body which we received via checkout.html
+        #print('COOKIES- ', request.COOKIES)
+        name= data['form']['name']
+        email= data['form']['email']
+        #total= data['form']['total']
 
+        #get cookies
+        cookieData= cookieCart(request) # retrieve all the order items & corresponding data from the cart
+        cartQUANTITY= cookieData['cartQUANTITY']
+        
+        items= cookieData['items']
+
+        # Create customer & order
+        # even if user accout does not exist, we still want to create the customer & order & orderitem
+        # will use E-MAIL for that guest user acount so that it can be accessed later on by that user
+        
+        customer, created= Customer.objects.get_or_create(email= email) 
+        customer.name= name  # set the customer name value 
+        customer.save() # save the customer field in the DB
+
+        # now save the order field
+        order = Order.objects.create(customer= customer, complete= False)
+
+        # Loop through all the items & attach them to the order
+        for item in items:
+            product= Product.objects.get(id=item['id'])
+
+            orderItem= OrderItem.objects.create(
+                        product= product,
+                        order= order,
+                        quantity= item['quantity'],
+                        )
+        '''
+
+        order, customer= guestCheckout(request, data) # call the module in utils.py 
+
+
+
+
+    total= float(data['form']['total'])
+    order.transaction_id= transaction_id
+
+    if total == order.cartTOTAL:
+        order.complete=True
+    order.save()
+
+    if order.shipping == True:
+        ShippingAddress.objects.create(
+            customer= customer,
+            order= order,
+            address= data['shipping']['address'],
+            city= data['shipping']['city'],
+            state= data['shipping']['state'],
+            zipcode= data['shipping']['zipcode'],
+        )
+    
     return JsonResponse('Payment Submitted!!!', safe= False)
 
     

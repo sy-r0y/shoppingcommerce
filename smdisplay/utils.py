@@ -74,4 +74,37 @@ def cartData(request):
         #print('Items- ', items)
     
     return{'cartQUANTITY': cartQUANTITY, 'items': items, 'order': order}
-    
+
+def guestCheckout(request, data):
+
+    name= data['form']['name']
+    email= data['form']['email']
+    #total= data['form']['total']
+
+    #get cookies
+    cookieData= cookieCart(request) # retrieve all the order items & corresponding data from the cart
+    cartQUANTITY= cookieData['cartQUANTITY']
+        
+    items= cookieData['items']
+
+    # Create customer & order
+    # even if user accout does not exist, we still want to create the customer & order & orderitem
+    # will use E-MAIL for that guest user acount so that it can be accessed later on by that user
+        
+    customer, created= Customer.objects.get_or_create(email= email) 
+    customer.name= name  # set the customer name value 
+    customer.save() # save the customer field in the DB
+
+    # now save the order field
+    order = Order.objects.create(customer= customer, complete= False)
+
+    # Loop through all the items & attach them to the order
+    for item in items:
+        product= Product.objects.get(id=item['id'])
+
+        orderItem= OrderItem.objects.create(
+                    product= product,
+                    order= order,
+                    quantity= item['quantity'],
+                    )
+    return order, customer    

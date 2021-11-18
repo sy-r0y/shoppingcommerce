@@ -151,8 +151,11 @@
         })
         .then((response) => response.json())
         .then((data) => {
+            // promise is here  
             console.log('Success', data);
             alert("Transaction Completed");
+            cart= {}  // Clear out the cookie 'cart'
+            document.cookie = 'cart='+JSON.stringify(cart)+';domain=;path=/'
             window.location.href= "{% url 'store' %}"
         })
     }
