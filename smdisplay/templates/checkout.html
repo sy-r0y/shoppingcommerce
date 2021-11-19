@@ -69,9 +69,10 @@
 
         </div>
     </div>
-    <script src="https://www.paypal.com/sdk/js?client-id=AZAn2lfykCYYZHGoTdUgCBu3Ud3yU5JWWc-nWgeuAmJ2N6Gt7XnHX2g8iZJopyX_oAJfbF62VUd_wkhb&currency=USD"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=&currency=USD"></script>
     <script>
         // Render the PayPal button into #paypal-button-container
+        var total= '{{order.cartTOTAL}}'
         paypal.Buttons({
 
             // change styling of the buttons
@@ -87,7 +88,7 @@
                 return actions.order.create({
                     purchase_units: [{
                         amount: {
-                            value: '{{order.cartTOTAL}}'
+                            value: parseFloat(total).toFixed(2)
                         }
                     }]
                 });
@@ -96,16 +97,18 @@
             // Finalize the transaction
             onApprove: function(data, actions) {
                 return actions.order.capture().then(function(orderData) {
+                    
                     // Successful capture! For demo purposes:
-                    console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
-                    var transaction = orderData.purchase_units[0].payments.captures[0];
-                    alert('Transaction '+ transaction.status + ': ' + transaction.id + '\n\nSee console for all available details');
-                    //alert('hello madarchod')
+                    //console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+                    //var transaction = orderData.purchase_units[0].payments.captures[0];
+                    //alert('Transaction '+ transaction.status + ': ' + transaction.id + '\n\nSee console for all available details');
+                    
+                    submitFormData()  //trigger this function on successful completion
 
                     // Replace the above to show a success message within this page, e.g.
-                    // const element = document.getElementById('paypal-button-container');
-                    // element.innerHTML = '';
-                    // element.innerHTML = '<h3>Thank you for your payment!</h3>';
+                    //const element = document.getElementById('paypal-button-container');
+                    //element.innerHTML = '';
+                    //element.innerHTML = '<h3>Thank you for your payment!</h3>';
                     // Or go to another URL:  actions.redirect('thank_you.html');
                 });
             }
@@ -149,10 +152,11 @@
         })
 
         /*document.getElementById('make-payment').addEventListener('click', function(e){
-            submitFormData()  // Trigger this function when the event "click" happens on the element "make-payment" i.e customer "makes the payment"
+        submitFormData()  // Trigger this function when the event "click" happens on the element "make-payment" i.e customer "makes the payment"
             
         })*/
-        function submitFormData(){  // function gets called when customer "pays" (clicks on make payment)
+        
+        function submitFormData(){  // function gets called when customer "pays" (clicks on make payment via PayPal)
             
             // Create 2 JavaScript objects & pass the data to the backend using those two objects
             
