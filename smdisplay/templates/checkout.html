@@ -43,7 +43,8 @@
             <br>
             <div class="box-element hidden" id="payment-info">
                 <small>PayPal Options</small>
-                <button id='make-payment'>Make Payment</button>
+                <!--<button id='make-payment'>Make Payment</button> -->
+                <div id='paypal-button-container'></div>
             </div>
         </div>
 
@@ -68,100 +69,141 @@
 
         </div>
     </div>
-<script type='text/javascript'>
-    
-    
-    var shipping= "{{order.shipping}}"
-    var total= "{{order.cartTOTAL}}"
+    <script src="https://www.paypal.com/sdk/js?client-id=AZAn2lfykCYYZHGoTdUgCBu3Ud3yU5JWWc-nWgeuAmJ2N6Gt7XnHX2g8iZJopyX_oAJfbF62VUd_wkhb&currency=USD"></script>
+    <script>
+        // Render the PayPal button into #paypal-button-container
+        paypal.Buttons({
 
-    //console.log("User:- ", user)
-    
-    if (shipping== "False"){
-        document.getElementById('shipping-info').innerHTML= ''
-    }
-    
-    if (user != "AnonymousUser"){
-        document.getElementById('user-info').innerHTML = ''
-    }
-
-    if (shipping == 'False' && user!= 'AnonymousUser'){
-        document.getElementById('form-wrapper').classList.add('hidden') // Hide entire form if user is logged in & shipping is not required(for digital project)
-        document.getElementById('payment-info').classList.remove('hidden') // Show paymen options if user is logged in & shipping is not required
-    }
-
-    var form= document.getElementById('form')
-
-    //csrftoken= form.getElementsByTagName('input')[0].value
-    //console.log('New Token', form.getElementsByTagName('input')[0].value)
-    
-    form.addEventListener('submit', function(e){
-        e.preventDefault()  // stop the form from performing its normal functions, we are going to handle what occurs
-        
-        console.log("Form Submitted!!")
-        document.getElementById('form-button').classList.add('hidden')
-        document.getElementById('payment-info').classList.remove('hidden')
-        
-    })
-
-    document.getElementById('make-payment').addEventListener('click', function(e){
-        submitFormData()  // Trigger this function when the event "click" happens on the element "make-payment" i.e customer "makes the payment"
-        
-    })
-    function submitFormData(){  // function gets called when customer "pays" (clicks on make payment)
-        
-        // Create 2 JavaScript objects & pass the data to the backend using those two objects
-        
-        console.log('Payment Done!!')
-        var userFormData= {
-            'name': null,
-            'email': null,
-            'total': total,
-        }
-        var shippingInfo= {
-            'address': null,
-            'city': null,
-            'state': null,
-            'zipcode': null,
-        }
-
-        if (shipping != "False"){
-            shippingInfo.address= form.address.value
-            shippingInfo.city= form.city.value
-            shippingInfo.state= form.state.value
-            shippingInfo.zipcode= form.zipcode.value
-
-        }
-        if(user == "AnonymousUser"){
-            userFormData.name= form.name.value
-            userFormData.email= form.email.value
-            //userFormData.total
-        }
-
-        //console.log('User Form Info: ', userFormData)
-        //console.log('Shipping Info: ', shippingInfo)
-        
-        var url= "process_order"
-        fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": csrftoken,
+            // change styling of the buttons
+            style: {
+                color: 'gold',
+                shape: 'pill',
+                size: 'responsive',
+                //height: 'small',
             },
-            body: JSON.stringify({"form": userFormData, "shipping": shippingInfo}),
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            // promise is here  
-            console.log('Success', data);
-            alert("Transaction Completed");
-            cart= {}  // Clear out the cookie 'cart'
-            document.cookie = 'cart='+JSON.stringify(cart)+';domain=;path=/'
-            window.location.href= "{% url 'store' %}"
-        })
-    }
+            
+            // Set up the transaction
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: '{{order.cartTOTAL}}'
+                        }
+                    }]
+                });
+            },
+
+            // Finalize the transaction
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(orderData) {
+                    // Successful capture! For demo purposes:
+                    console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+                    var transaction = orderData.purchase_units[0].payments.captures[0];
+                    alert('Transaction '+ transaction.status + ': ' + transaction.id + '\n\nSee console for all available details');
+                    //alert('hello madarchod')
+
+                    // Replace the above to show a success message within this page, e.g.
+                    // const element = document.getElementById('paypal-button-container');
+                    // element.innerHTML = '';
+                    // element.innerHTML = '<h3>Thank you for your payment!</h3>';
+                    // Or go to another URL:  actions.redirect('thank_you.html');
+                });
+            }
 
 
-</script>
+        }).render('#paypal-button-container');
+    </script>
+    
+    <script type='text/javascript'>
+    
+        var shipping= "{{order.shipping}}"
+        var total= "{{order.cartTOTAL}}"
+
+        //console.log("User:- ", user)
+        
+        if (shipping== "False"){
+            document.getElementById('shipping-info').innerHTML= ''
+        }
+        
+        if (user != "AnonymousUser"){
+            document.getElementById('user-info').innerHTML = ''
+        }
+
+        if (shipping == 'False' && user!= 'AnonymousUser'){
+            document.getElementById('form-wrapper').classList.add('hidden') // Hide entire form if user is logged in & shipping is not required(for digital project)
+            document.getElementById('payment-info').classList.remove('hidden') // Show paymen options if user is logged in & shipping is not required
+        }
+
+        var form= document.getElementById('form')
+
+        //csrftoken= form.getElementsByTagName('input')[0].value
+        //console.log('New Token', form.getElementsByTagName('input')[0].value)
+        
+        form.addEventListener('submit', function(e){
+            e.preventDefault()  // stop the form from performing its normal functions, we are going to handle what occurs
+            
+            console.log("Form Submitted!!")
+            document.getElementById('form-button').classList.add('hidden')
+            document.getElementById('payment-info').classList.remove('hidden')
+            
+        })
+
+        /*document.getElementById('make-payment').addEventListener('click', function(e){
+            submitFormData()  // Trigger this function when the event "click" happens on the element "make-payment" i.e customer "makes the payment"
+            
+        })*/
+        function submitFormData(){  // function gets called when customer "pays" (clicks on make payment)
+            
+            // Create 2 JavaScript objects & pass the data to the backend using those two objects
+            
+            console.log('Payment Done!!')
+            var userFormData= {
+                'name': null,
+                'email': null,
+                'total': total,
+            }
+            var shippingInfo= {
+                'address': null,
+                'city': null,
+                'state': null,
+                'zipcode': null,
+            }
+
+            if (shipping != "False"){
+                shippingInfo.address= form.address.value
+                shippingInfo.city= form.city.value
+                shippingInfo.state= form.state.value
+                shippingInfo.zipcode= form.zipcode.value
+
+            }
+            if(user == "AnonymousUser"){
+                userFormData.name= form.name.value
+                userFormData.email= form.email.value
+                //userFormData.total
+            }
+
+            //console.log('User Form Info: ', userFormData)
+            //console.log('Shipping Info: ', shippingInfo)
+            
+            var url= "process_order"
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrftoken,
+                },
+                body: JSON.stringify({"form": userFormData, "shipping": shippingInfo}),
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                // promise is here  
+                console.log('Success', data);
+                alert("Transaction Completed");
+                cart= {}  // Clear out the cookie 'cart'
+                document.cookie = 'cart='+JSON.stringify(cart)+';domain=;path=/'
+                window.location.href= "{% url 'store' %}"
+            })
+        }
+    </script>
 {% endblock mid %}
-
 <hr>
